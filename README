@@ -1,1 +1,12 @@
 jQuery plugin for in-place updating of table values using AJAX calls
+
+This should ease situations when you have tabular data and want users to be able to change values in some columns (most usable in administration tools).
+
+Features:
+- easy navigation using arrow keys
+- content validation before sent to server
+- highly customizable
+
+Future:
+- more validators
+- add select and checkbox elements for multiple choices and boolean values
