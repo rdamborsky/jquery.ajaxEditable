@@ -1,5 +1,5 @@
 // jQuery AJAX editable plugin
-// v0.1
+// v0.2
 // @ 2011 Roman Damborsky <rdamborsky@gmail.com> (www.rdamborsky.com)
 
 (function($) {
@@ -9,7 +9,9 @@
 
 			defaults = {
 				// type of editable element to be created - see inputElements object
-				type: 'text',
+				inputType: 'text',
+				// may need some more data for certain input types
+				inputData: null,
 				// function for content validation before saving - use editable validators extension or custom function(options, value)
 				validator: null,
 				// type of ajax request [ GET | POST ]
@@ -85,20 +87,41 @@
 					text: function(params) {
 						var $cont = params.$container,
 							originalValue = $cont.text(),
-							$field;
+							$input;
 
-						$field = $('<input/>').
+						$input = $('<input/>').
 							attr('id', params.idPrefix + params.order).
 							attr('value', originalValue);
 
-						$cont.empty().append($field);
+						$cont.empty().append($input);
 
 						// when initialized, store current value of data within input element
-						return $field.addClass(params.elementClass).data(params.valueHolderKey, originalValue);
+						return $input.addClass(params.elementClass).data(params.valueHolderKey, originalValue);
+					},
+					select: function(params) {
+						var $cont = params.$container,
+							originalValue = $cont.text(),
+							$select, $option, item, data = params.inputData;
+
+						$select = $('<select>').
+							attr('id', params.idPrefix + params.order).
+							attr('value', originalValue);
+
+						for (item in data) {
+							$option = $('<option>').attr('value', item).text(data[item]);
+							if (item === originalValue) {
+								$option.attr('selected', 'selected');
+							}
+							$select.append($option);
+						}
+
+						$cont.empty().append($select);
+
+						return $select.addClass(params.elementClass).data(params.valueHolderKey, originalValue);
 					}
 				},
 				create: function(params) {
-					return this.elementTypes[params.type](params);
+					return this.elementTypes[params.inputType](params);
 				}
 			};
 
@@ -111,7 +134,8 @@
 				// replace target element with form element
 				$element = inputElements.create({
 					$container: $this,
-					type: opts.type,
+					inputType: opts.inputType,
+					inputData: opts.inputData,
 					order: i,
 					valueHolderKey: originalValueKey,
 					idPrefix: opts.formElementsIdPrefix,
@@ -150,6 +174,12 @@
 					validateAndSave($(this));
 				});
 
+				// change for select element
+				if ($element.is('select')) {
+					$element.bind('change', function() {
+						validateAndSave($(this));
+					});
+				}
 			});
 
 		}

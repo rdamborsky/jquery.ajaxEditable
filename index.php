@@ -13,6 +13,7 @@
 		.editable-invalid {background:#c00;color:#fff;}
 		.level-editable input {width:40px;display:block;}
 		.amount-editable input {width:60px;display:block;}
+		.rank-editable select {width:80px;display:block;}
 		.not-updated {background:#000;color:#fff;}
 		#log {width:30em;height:10em;overflow:auto;margin-top:1em;}
 	</style>
@@ -27,31 +28,37 @@
 				<th>Name</th>
 				<th>Level</th>
 				<th>Amount</th>
+				<th>Rank</th>
 			</tr>
 			<tr data-id="100">
 				<td>Foo sr.</td>
 				<td><div class="level-editable">3</div></td>
 				<td><div class="amount-editable">40</div></td>
+				<td><div class="rank-editable">noob</div></td>
 			</tr>
 			<tr data-id="101">
 				<td>Kate</td>
 				<td><div class="level-editable">6</div></td>
 				<td><div class="amount-editable">23</div></td>
+				<td><div class="rank-editable">pro</div></td>
 			</tr>
 			<tr data-id="102">
 				<td>Mike</td>
 				<td><div class="level-editable">1</div></td>
 				<td><div class="amount-editable">85</div></td>
+				<td><div class="rank-editable">noob</div></td>
 			</tr>
 			<tr data-id="103">
 				<td>Foo jr.</td>
 				<td><div class="level-editable">4</div></td>
 				<td><div class="amount-editable">107</div></td>
+				<td><div class="rank-editable">good</div></td>
 			</tr>
 			<tr data-id="104">
 				<td>Bar</td>
 				<td><div class="level-editable">9</div></td>
 				<td><div class="amount-editable">61</div></td>
+				<td><div class="rank-editable">awhsom</div></td>
 			</tr>
 		</tbody>
 	</table>
@@ -79,9 +86,11 @@
 
 			// when ajax response is returned, do something useful...
 			var editCallback = function($element, reply) {
-				var success = (reply.status === 'ok');
-				$element.parent().addClass(success ? 'editOk' : 'editError');
-				$element.animate({ width: '+=20' }, 700);
+				var success = (reply.status === 'ok'),
+					$parent = $element.parent(),
+					className = success ? 'editOk' : 'editError';
+				$parent.addClass(className);
+				$element.animate({ width: '+=20' }, { duration: 700, complete: function() { $parent.removeClass(className); } });
 				if (success) {
 					log('Property ' + reply.input.source + ' updated to ' + reply.input.data + ' for id=' + reply.input.id);
 				}
@@ -103,6 +112,34 @@
 					return editDataPrepare('amount', $element, value);
 				},
 				ajaxCallback: editCallback
+			});
+
+			$('.rank-editable').ajaxEditable({
+				inputType: 'select',
+				inputData: {
+					noob: 'Noobie',
+					good: 'Good',
+					pro: 'Pro ^_^',
+					awhsom: 'Awhsom!'
+				},
+				arrowKeysNavigation: false,
+				classNameEditableSet: 'rank-editable',
+				ajaxPrepare: function($element, value) {
+					$element.removeClass('editable-invalid');
+					return editDataPrepare('rank', $element, value);
+				},
+				ajaxCallback: function($element, reply) {
+					var success = (reply.status === 'ok'),
+						$parent = $element.parent(),
+						className = success ? 'editOk' : 'editError';
+					$parent.addClass(className);
+					$element.animate({ width: 80 }, { duration: 700, complete: function() { $parent.removeClass(className); } });
+					if (success) {
+						log('Property ' + reply.input.source + ' updated to ' + reply.input.data + ' for id=' + reply.input.id);
+					} else {
+						$element.addClass('editable-invalid');
+					}
+				}
 			});
 
 		});
