@@ -176,7 +176,7 @@
 
 				// change for select element
 				if ($element.is('select')) {
-					$element.bind('change', function() {
+					$element.unbind('blur').unbind('keyup').bind('change', function() {
 						validateAndSave($(this));
 					});
 				}
